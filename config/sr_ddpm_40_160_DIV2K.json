@@ -1,0 +1,104 @@
+{
+    "name": "sr_DIV2K_40_160",
+    "phase": "train",
+    "gpu_ids": [
+        0
+    ],
+    "path": {
+        "log": "logs",
+        "tb_logger": "tb_logger",
+        "results": "results",
+        "checkpoint": "checkpoint",
+        "resume_state": "/newHome/S2_HHH/gitte/ddpm_our/experiments/sr_DIV2K_40_160_250603_112531/checkpoint/I50000_E16"
+    },
+    "datasets": {
+        "train": {
+            "name": "DIV2k",
+            "mode": "HR",
+            "dataroot": "/newHome/S2_HHH/gitte/ddpm_our/dataset/DIV2K/train_40_160",
+            "datatype": "img", //lmdb or img, path of img files
+            "l_resolution": 40,
+            "r_resolution": 160,
+			// "batch_size": 8,
+            "batch_size": 24,
+            "num_workers": 3,
+            "use_shuffle": true,
+            "data_len": -1
+        },
+        "val": {
+            "name": "DIV2k",
+            "mode": "LRHR",
+            "dataroot": "/newHome/S2_HHH/gitte/ddpm_our/dataset/DIV2K/test_40_160",
+            "datatype": "img", //lmdb or img, path of img files
+            "l_resolution": 40,
+            "r_resolution": 160,
+			"batch_size": 16,
+			"num_workers": 3,
+		    // 是否乱序
+		    "use_shuffle": false,
+            "data_len": -1
+        }
+    },
+    "model": {
+        "which_model_G": "ddpm", //ddpm, sr3
+        "finetune_norm": false,
+        "unet": {
+            "in_channel": 6,
+            "out_channel": 3,
+            "inner_channel": 64,
+            "channel_multiplier": [
+                1,
+		        2,
+		        4,
+		        8,
+		        8
+            ],
+            "attn_res": [
+                16
+            ],
+            "res_blocks": 2,
+			// 0.2
+            "dropout": 0.0
+        },
+        "beta_schedule": {
+            "train": {
+                "schedule": "linear",
+                // "n_timestep": 2000,
+				"n_timestep": 500,
+                "linear_start": 1e-6,
+                "linear_end": 1e-2
+            },
+            "val": {
+                "schedule": "linear",
+                // "n_timestep": 2000,
+				"n_timestep": 500,
+                "linear_start": 1e-6,
+                "linear_end": 1e-2
+            }
+        },
+        "diffusion": {
+            "image_size": 160,
+            "channels": 3, //sample channel
+            "conditional": true
+        }
+    },
+    "train": {
+        "n_iter": 100000,
+        "val_freq": 1e4,
+        "save_checkpoint_freq": 1e4,
+		// "print_freq": 600, batch_size = 8 是 1 epoch,
+        "print_freq": 200,
+        "optimizer": {
+            "type": "adamw",
+            "lr": 1e-4
+        },
+        "ema_scheduler": {
+            "step_start_ema": 5000,
+            "update_ema_every": 1,
+            "ema_decay": 0.9999
+        }
+    },
+    "wandb": {
+        "project": "sr_DIV2K_40_160"
+    }
+}
